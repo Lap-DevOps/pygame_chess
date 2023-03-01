@@ -44,6 +44,47 @@ class TestGame(TestCase):
         # Check if the game runs at the correct frame rate
         self.assertAlmostEqual(clock.get_fps(), FPS, delta=10)
 
+    def test_board_size(self):
+        # Create a window
+        pg.display.set_mode((700, 700))
+
+        # Get the board surface
+        board = pg.display.get_surface().copy()
+        board_rect = board.get_rect()
+
+        # Check if the board size is correct
+        self.assertEqual(board_rect.width, 700)
+        self.assertEqual(board_rect.height, 700)
+
+    def test_cell_size(self):
+        # Create a window
+        pg.display.set_mode((700, 700))
+
+        # Get the board surface
+        board = pg.display.get_surface().copy()
+        board_rect = board.get_rect()
+
+        # Check if the cell size is correct
+        self.assertEqual(board_rect.width % 10, 0)
+        self.assertEqual(board_rect.height % 10, 0)
+
+
+    def test_fps(self):
+        # Set the frame rate
+        FPS = 30
+
+        # Create a window
+        pg.display.set_mode((200, 200))
+
+        # Create a clock object to regulate the frame rate
+        clock = pg.time.Clock()
+
+        # Call the main game loop 100 times
+        for _ in range(100):
+            clock.tick(FPS)
+
+        # Check if the game runs at the correct frame rate
+        self.assertAlmostEqual(clock.get_fps(), FPS, delta=1)
 
 
 if __name__ == '__main__':
