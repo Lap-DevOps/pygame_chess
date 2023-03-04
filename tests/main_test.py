@@ -1,5 +1,8 @@
 from unittest import TestCase, main
 import pygame as pg
+from unittest.mock import MagicMock, patch
+from game_config import *
+from chess_items import *
 
 
 class TestGame(TestCase):
@@ -85,6 +88,16 @@ class TestGame(TestCase):
 
         # Check if the game runs at the correct frame rate
         self.assertAlmostEqual(clock.get_fps(), FPS, delta=1)
+    def setUp(self):
+        # create a display surface
+        self.screen = pg.display.set_mode(WINDOW_SIZE)
+        self.clock = pg.time.Clock()
+    def test_chessboard_creation(self):
+        # create a chessboard object
+        chessboard = Chessboard(self.screen)
+
+        # assert that the chessboard object was created successfully
+        self.assertIsInstance(chessboard, Chessboard)
 
 
 if __name__ == '__main__':
