@@ -10,6 +10,7 @@ class Chessboard:
     def __init__(self, parent_surface: pg.Surface,
                  cell_qty: int = CELL_QTY, cell_size: int = CELL_SIZE):
         self.__screen = parent_surface
+        self.__prepare_screen()
         self.__draw_playboard(cell_qty, cell_size)
         pg.display.update()
 
@@ -22,6 +23,10 @@ class Chessboard:
             2 * num_fields_depth + total_width,
             2 * num_fields_depth + total_width
         )).convert_alpha()
+
+        back_img = pg.image.load(IMG_PATH + BOARD_BG_IMG)
+        back_img = pg.transform.scale(back_img, (playboard_view.get_width(), playboard_view.get_height()))
+        playboard_view.blit(back_img, back_img.get_rect())
 
         playboard_view.blit(num_fields[0],
                             (0, num_fields_depth))
@@ -62,9 +67,14 @@ class Chessboard:
         cell_color_index = 1 if is_even_qty else 0
         for y in range(cell_qty):
             for x in range(cell_qty):
-                cell = pg.Surface((cell_size, cell_size))
-                cell.fill(COLORS[cell_color_index])
+                cell = pg.image.load(IMG_PATH + COLORS[cell_color_index])
+                cell = pg.transform.scale(cell, (cell_size, cell_size))
                 fields.blit(cell, (x * cell_size, y * cell_size))
                 cell_color_index ^= True
             cell_color_index = cell_color_index ^ True if (is_even_qty) else cell_color_index
         return fields
+
+    def __prepare_screen(self):
+        back_img = pg.image.load(IMG_PATH + WIM_BG_IMG)
+        back_img = pg.transform.scale(back_img, WINDOW_SIZE)
+        self.__screen.blit(back_img, (0, 0))
