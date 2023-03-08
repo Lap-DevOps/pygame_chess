@@ -1,6 +1,8 @@
 import pygame as pg
 
+import board_data
 from game_config import *
+from pieces import *
 
 pg.init()
 fnt_num = pg.font.Font(FNT_PTH, FNT_SIZE)
@@ -10,17 +12,21 @@ class Chessboard:
     def __init__(self, parent_surface: pg.Surface,
                  cell_qty: int = CELL_QTY, cell_size: int = CELL_SIZE):
         self.__screen = parent_surface
+        self.__table = board_data.board
         self.__qty = cell_qty
         self.__size = cell_size
-        self.__all_cells=pg.sprite.Group()
+        self.__pieces_types = PIECES_TYPES
+        self.__all_cells = pg.sprite.Group()
+        self.__all_pieces = pg.sprite.Group()
         self.__prepare_screen()
         self.__draw_playboard()
+        self.__draw_all_pieses()
         pg.display.update()
 
     def __draw_playboard(self, ):
         total_width = self.__qty * self.__size
         num_fields = self.__create_num_fields()
-        self.__all_cells=self.__create_all_cells()
+        self.__all_cells = self.__create_all_cells()
 
         num_fields_depth = num_fields[0].get_width()
         playboard_view = pg.Surface((
@@ -46,8 +52,8 @@ class Chessboard:
         playboard_rect.y += (self.__screen.get_height() - playboard_rect.height) // 2
         self.__screen.blit(playboard_view, playboard_rect)
         cells_offsets = (
-            playboard_rect.x+num_fields_depth,
-            playboard_rect.y+num_fields_depth
+            playboard_rect.x + num_fields_depth,
+            playboard_rect.y + num_fields_depth
         )
         self.__draw_cells_on_playboard(cells_offsets)
 
@@ -91,6 +97,32 @@ class Chessboard:
             cell.rect.x += cells_offsets[0]
             cell.rect.y += cells_offsets[1]
         self.__all_cells.draw(self.__screen)
+
+    def __draw_all_pieses(self):
+        self.__setup_board()
+        self.__all_pieces.draw(self.__screen)
+
+    def __setup_board(self):
+        for j, row in enumerate(self.__table):
+            for i, field_value in enumerate(row):
+                if field_value != 0:
+                    piece = self.__create_piece(field_value, (j, i))
+                    self.__all_pieces.add(piece)
+        for piece in self.__all_pieces:
+            for cell in self.__all_cells:
+                if piece.field_name == cell.field_name:
+                    piece.rect = cell.rect
+
+    def __create_piece(self, piece_symbol: str, table_coord: tuple):
+        field_name = self.__to_field_name(table_coord)
+        piece_tuple = self.__pieces_types[piece_symbol]
+
+        classname = globals()[piece_tuple[0]]
+
+        return classname(self.__size, piece_tuple[1], field_name)
+
+    def __to_field_name(self, table_coord: tuple):
+        return LTRS[table_coord[1]] + str(self.__qty - table_coord[0])
 
 
 class Cell(pg.sprite.Sprite):
