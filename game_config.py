@@ -6,6 +6,7 @@ WHITE = (255, 255, 255)
 GREY = (180, 180, 180)
 MID_GREY = (90, 90, 90)
 YELLOW = (255, 255, 0)
+ACIVE_CELL_COLOR = (174,111,237,64)
 CELL_QTY = 8
 CELL_SIZE = 70
 COLORS = ('142-dark-parquet-flooring-texture-seamless-hr-1.jpg', '0094-old-wood-boards-texture-seamless.jpg')
