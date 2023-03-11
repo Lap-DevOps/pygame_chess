@@ -12,6 +12,10 @@ class Piece(pg.sprite.Sprite):
         self._color = color
         self.field_name = field_name
 
+    def move_to_cell(self, cell):
+        self.rect = cell.rect.copy()
+        self.field_name = cell.field_name
+
 
 class King(Piece):
     def __init__(self, cell_size: int, color: str, field: str):

@@ -24,3 +24,5 @@ if __name__ == '__main__':
                 chessboard.btn_down(event.button,event.pos)
             if event.type == pg.MOUSEBUTTONUP:
                 chessboard.btn_up(event.button,event.pos)
+            if event.type == pg.MOUSEMOTION:
+                chessboard.drad(event.pos)

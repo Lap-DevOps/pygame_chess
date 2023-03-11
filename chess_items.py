@@ -18,6 +18,7 @@ class Chessboard:
         self.__all_areas = pg.sprite.Group()
         self.__pressed_cell = None
         self.__picked_piece = None
+        self.__dragged_piece = None
         self.__prepare_screen()
         self.__draw_playboard()
         self.__draw_all_pieses()
@@ -111,7 +112,7 @@ class Chessboard:
         for piece in self.__all_pieces:
             for cell in self.__all_cells:
                 if piece.field_name == cell.field_name:
-                    piece.rect = cell.rect
+                    piece.rect = cell.rect.copy()
 
     def __create_piece(self, piece_symbol: str, table_coord: tuple):
         field_name = self.__to_field_name(table_coord)
@@ -124,6 +125,10 @@ class Chessboard:
 
     def btn_down(self, button_type: int, position: tuple):
         self.__pressed_cell = self.__get_cell(position)
+        self.__dragged_piece = self.__get_piece_on_cell(self.__pressed_cell)
+        if self.__dragged_piece is not None:
+            self.__dragged_piece.rect.center = position
+        self.__grand_update()
 
     def btn_up(self, button_type: int, position: tuple):
         released_cell = self.__get_cell(position)
@@ -132,7 +137,16 @@ class Chessboard:
                 self.__mark_cell(released_cell)
             if button_type == 1:
                 self.__pick_cell(released_cell)
+        if self.__dragged_piece is not None:
+            self.__dragged_piece.move_to_cell(released_cell)
+            self.__dragged_piece = None
+
         self.__grand_update()
+
+    def drad(self, position: tuple):
+        if self.__dragged_piece is not None:
+            self.__dragged_piece.rect.center = position
+            self.__grand_update()
 
     def __get_piece(self, position: tuple):
         for piece in self.__all_piece:
@@ -144,6 +158,12 @@ class Chessboard:
         for cell in self.__all_cells:
             if cell.rect.collidepoint(position):
                 return cell
+        return None
+
+    def __get_piece_on_cell(self, cell):
+        for piece in self.__all_pieces:
+            if piece.field_name == cell.field_name:
+                return piece
         return None
 
     def __mark_cell(self, cell):
@@ -160,15 +180,14 @@ class Chessboard:
     def __pick_cell(self, cell):
         self.__unmark_all_cells()
         if self.__picked_piece is None:
-            for piece in self.__all_pieces:
-                if piece.field_name == cell.field_name:
-                    pick = Area(cell, False)
-                    self.__all_areas.add(pick)
-                    self.__picked_piece = piece
-                    break
+            piece = self.__get_piece_on_cell(cell)
+            if piece is not None:
+                pick = Area(cell, False)
+                self.__all_areas.add(pick)
+                self.__picked_piece = piece
+
         else:
-            self.__picked_piece.rect = cell.rect
-            self.__picked_piece.field_name = cell.field_name
+            self.__picked_piece.move_to_cell(cell)
             self.__picked_piece = None
 
     def __unmark_all_cells(self):
