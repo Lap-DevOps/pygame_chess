@@ -5,6 +5,9 @@ pg.init()
 fnt_num = pg.font.Font(FNT_PTH, FNT_SIZE)
 
 
+
+
+
 class Chessboard:
     def __init__(self, parent_surface: pg.Surface,
                  cell_qty: int = CELL_QTY, cell_size: int = CELL_SIZE):
@@ -19,6 +22,7 @@ class Chessboard:
         self.__pressed_cell = None
         self.__picked_piece = None
         self.__dragged_piece = None
+        self.__inputbox = None
         self.__prepare_screen()
         self.__draw_playboard()
         self.__setup_board()
@@ -50,13 +54,14 @@ class Chessboard:
 
         playboard_rect = playboard_view.get_rect()
         playboard_rect.x += (self.__screen.get_width() - playboard_rect.width) // 2
-        playboard_rect.y += (self.__screen.get_height() - playboard_rect.height) // 2
+        playboard_rect.y += (self.__screen.get_height() - playboard_rect.height) // 4
         self.__screen.blit(playboard_view, playboard_rect)
         cells_offsets = (
             playboard_rect.x + num_fields_depth,
             playboard_rect.y + num_fields_depth
         )
         self.__apply_offsets_for_cells(cells_offsets)
+        self.__draw_input_box(playboard_rect)
 
     def __create_num_fields(self):
         n_lines = pg.Surface((self.__qty * self.__size, self.__size // 3)).convert_alpha()
@@ -98,8 +103,6 @@ class Chessboard:
             cell.rect.x += cells_offsets[0]
             cell.rect.y += cells_offsets[1]
 
-
-
     def __setup_board(self):
         for j, row in enumerate(self.__table):
             for i, field_value in enumerate(row):
@@ -122,10 +125,15 @@ class Chessboard:
 
     def btn_down(self, button_type: int, position: tuple):
         self.__pressed_cell = self.__get_cell(position)
-        self.__dragged_piece = self.__get_piece_on_cell(self.__pressed_cell)
-        if self.__dragged_piece is not None:
-            self.__dragged_piece.rect.center = position
-        self.__grand_update()
+        if self.__pressed_cell.field_name != 'inputbox':
+            self.__inputbox.deactivate()
+            self.__dragged_piece = self.__get_piece_on_cell(self.__pressed_cell)
+            if self.__dragged_piece is not None:
+                self.__dragged_piece.rect.center = position
+                self.__grand_update()
+        else:
+            self.__pressed_cell = None
+            self.__inputbox.activate()
 
     def btn_up(self, button_type: int, position: tuple):
         released_cell = self.__get_cell(position)
@@ -203,6 +211,10 @@ class Chessboard:
         self.__all_pieces.draw(self.__screen)
         pg.display.update()
 
+    def __draw_input_box(self, board_rect: pg.rect):
+        self.__inputbox = Inputbox(board_rect)
+        self.__all_cells.add(self.__inputbox)
+
 
 class Cell(pg.sprite.Sprite):
     def __init__(self, color_index: int, size: int, coords: tuple, name: str, ):
@@ -229,3 +241,27 @@ class Area(pg.sprite.Sprite):
             self.image.fill(ACIVE_CELL_COLOR)
         self.rect = pg.Rect(coord, area_size)
         self.field_name = cell.field_name
+
+
+class Inputbox(pg.sprite.Sprite):
+    def __init__(self, board_rect: pg.Rect):
+        super().__init__()
+        x, y = board_rect.x, board_rect.y
+        width, height = board_rect.width, board_rect.width
+        self.field_name = 'inputbox'
+        self.text = ''
+        self.active = False
+        self.image = pg.Surface((width, INPUT_SIZE)).convert_alpha()
+        self.image.fill(BLACK)
+        # pg.draw.rect(self.image, WHITE, (0, 0, self.rect.width, self.rect.height), 2)
+        self.rect = pg.Rect(x, 2 * y + height, width, INPUT_SIZE)
+        pg.draw.rect(self.image, WHITE, (0, 0, self.rect.width, self.rect.height), 2)
+
+
+    def activate(self):
+        self.active = True
+        pg.draw.rect(self.image, INPUT_FONT_COLOR, (0, 0, self.rect.width, self.rect.height), 2)
+
+    def deactivate(self):
+        self.active = False
+        pg.draw.rect(self.image, WHITE, (0, 0, self.rect.width, self.rect.height), 2)
