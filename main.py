@@ -26,3 +26,7 @@ if __name__ == '__main__':
                 chessboard.btn_up(event.button,event.pos)
             if event.type == pg.MOUSEMOTION:
                 chessboard.drad(event.pos)
+            if event.type == pg.KEYUP:
+                chessboard.key_up(event)
+            if event.type == pg.KEYDOWN:
+                chessboard.key_down(event)
