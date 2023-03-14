@@ -19,6 +19,8 @@ IMG_PATH = 'assets/images/'
 WIM_BG_IMG = 'Texture_of_Old_wood_floor_Wall_Mural_Wallpaper_a_1400x.jpg'
 BOARD_BG_IMG = '63-old-dark-wood-flooring-square-texture-seamless-hr.jpg'
 PIECE_PATH = 'assets/images/pieces/'
+BACKGROUND_SOUND= 'assets/sounds/back.mp3'
+MOVE_SOUND = 'assets/sounds/move.mp3'
 PIECES_TYPES = {
     'k': ('King', 'b'), 'K': ('King', 'w'),
     'q': ('Queen', 'b'), 'Q': ('Queen', 'w'),
