@@ -28,6 +28,13 @@ class Chessboard:
         self.__draw_playboard()
         self.__setup_board()
         self.__grand_update()
+        self.__prepare_music()
+
+    def __prepare_music(self):
+        pg.mixer.music.load(BACKGROUND_SOUND)
+        pg.mixer.music.set_volume(0.2)
+        pg.mixer.music.play(-1)
+
 
     def __draw_playboard(self, ):
         total_width = self.__qty * self.__size

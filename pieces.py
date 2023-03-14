@@ -11,9 +11,13 @@ class Piece(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self._color = color
         self.field_name = field_name
+        self.__sound = pg.mixer.Sound(MOVE_SOUND)
+
 
     def move_to_cell(self, cell):
-        self.rect = cell.rect.copy()
+        if self.field_name != cell.field_name:
+            self.rect = cell.rect.copy()
+            self.__sound.play()
         self.field_name = cell.field_name
 
 
