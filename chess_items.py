@@ -21,8 +21,8 @@ class Chessboard:
         self.__dragged_piece = None
         self.__prepare_screen()
         self.__draw_playboard()
-        self.__draw_all_pieses()
-        pg.display.update()
+        self.__setup_board()
+        self.__grand_update()
 
     def __draw_playboard(self, ):
         total_width = self.__qty * self.__size
@@ -56,7 +56,7 @@ class Chessboard:
             playboard_rect.x + num_fields_depth,
             playboard_rect.y + num_fields_depth
         )
-        self.__draw_cells_on_playboard(cells_offsets)
+        self.__apply_offsets_for_cells(cells_offsets)
 
     def __create_num_fields(self):
         n_lines = pg.Surface((self.__qty * self.__size, self.__size // 3)).convert_alpha()
@@ -93,15 +93,12 @@ class Chessboard:
         back_img = pg.transform.scale(back_img, WINDOW_SIZE)
         self.__screen.blit(back_img, (0, 0))
 
-    def __draw_cells_on_playboard(self, cells_offsets):
+    def __apply_offsets_for_cells(self, cells_offsets):
         for cell in self.__all_cells:
             cell.rect.x += cells_offsets[0]
             cell.rect.y += cells_offsets[1]
-        self.__all_cells.draw(self.__screen)
 
-    def __draw_all_pieses(self):
-        self.__setup_board()
-        self.__all_pieces.draw(self.__screen)
+
 
     def __setup_board(self):
         for j, row in enumerate(self.__table):
@@ -140,8 +137,13 @@ class Chessboard:
         if self.__dragged_piece is not None:
             self.__dragged_piece.move_to_cell(released_cell)
             self.__dragged_piece = None
-
         self.__grand_update()
+
+    def key_up(self, event):
+        pass
+
+    def key_down(self, event):
+        pass
 
     def drad(self, position: tuple):
         if self.__dragged_piece is not None:
