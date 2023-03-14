@@ -1,11 +1,10 @@
+import pyperclip as clip
+
 import board_data
 from pieces import *
 
 pg.init()
 fnt_num = pg.font.Font(FNT_PTH, FNT_SIZE)
-
-
-
 
 
 class Chessboard:
@@ -22,6 +21,8 @@ class Chessboard:
         self.__pressed_cell = None
         self.__picked_piece = None
         self.__dragged_piece = None
+        self.__func_keys = [pg.K_LCTRL, pg.K_v, pg.K_RETURN, pg.K_BACKSPACE]
+        self.__hotkey = {pg.K_LCTRL: False, pg.K_v: False}
         self.__inputbox = None
         self.__prepare_screen()
         self.__draw_playboard()
@@ -148,10 +149,27 @@ class Chessboard:
         self.__grand_update()
 
     def key_up(self, event):
-        pass
+        if event.key == pg.K_LCTRL:
+            self.__hotkey[pg.K_LCTRL] = False
+        if event.key == pg.K_v:
+            self.__hotkey[pg.K_v] = False
 
     def key_down(self, event):
-        pass
+        if self.__inputbox.active and event.key in self.__func_keys:
+            if event.key == pg.K_LCTRL:
+                self.__hotkey[pg.K_LCTRL] = True
+                self.__check_paste()
+            if event.key == pg.K_v:
+                self.__hotkey[pg.K_v] = False
+                if not self.__check_paste():
+                    self.__inputbox.put_char(event.unicode)
+            if event.key == pg.K_RETURN:
+                self.__update_board_with_fen()
+            if event.key == pg.K_BACKSPACE:
+                self.__inputbox.pop_char()
+        elif self.__inputbox.active:
+            self.__inputbox.put_char(event.unicode)
+        self.__grand_update()
 
     def drad(self, position: tuple):
         if self.__dragged_piece is not None:
@@ -215,6 +233,34 @@ class Chessboard:
         self.__inputbox = Inputbox(board_rect)
         self.__all_cells.add(self.__inputbox)
 
+    def __check_paste(self):
+        if self.__hotkey[pg.K_LCTRL] and self.__hotkey[pg.K_v]:
+            self.__inputbox.put_char(clip.paste())
+            return True
+        else:
+            return False
+
+    def __update_board_with_fen(self):
+        empty_cells = 0
+        piece_map = self.__inputbox.text.split('/')
+        for r in range(len(self.__table)):
+            index = 0
+            for i in range(len(self.__table[r])):
+                if empty_cells == 0:
+                    try:
+                        empty_cells = int(piece_map[r][index])
+                        self.__table[r][i] = 0
+                        empty_cells -= 1
+                    except ValueError:
+                        self.__table[r][i] = piece_map[r][index]
+                        index += 1
+                else:
+                    self.__table[r][i] = 0
+                    empty_cells -= 1
+        self.__all_pieces.empty()
+        self.__setup_board()
+        self.__grand_update()
+
 
 class Cell(pg.sprite.Sprite):
     def __init__(self, color_index: int, size: int, coords: tuple, name: str, ):
@@ -257,7 +303,6 @@ class Inputbox(pg.sprite.Sprite):
         self.rect = pg.Rect(x, 2 * y + height, width, INPUT_SIZE)
         pg.draw.rect(self.image, WHITE, (0, 0, self.rect.width, self.rect.height), 2)
 
-
     def activate(self):
         self.active = True
         pg.draw.rect(self.image, INPUT_FONT_COLOR, (0, 0, self.rect.width, self.rect.height), 2)
@@ -265,3 +310,17 @@ class Inputbox(pg.sprite.Sprite):
     def deactivate(self):
         self.active = False
         pg.draw.rect(self.image, WHITE, (0, 0, self.rect.width, self.rect.height), 2)
+
+    def put_char(self, symbol: str):
+        self.text += symbol
+        self.__update_text()
+
+    def pop_char(self):
+        self.text = self.text[:-1]
+        self.__update_text()
+
+    def __update_text(self):
+        self.image.fill(BLACK)
+        pg.draw.rect(self.image, INPUT_FONT_COLOR, (0, 0, self.rect.width, self.rect.height), 2)
+        fen_text = fnt_num.render(self.text, 1, INPUT_FONT_COLOR)
+        self.image.blit(fen_text, (9, 9))
